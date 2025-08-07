@@ -38,7 +38,7 @@ npm install -g mcp-remote
 
 Verify installation:
 ```bash
-npx mcp-remote --version
+npm list -g mcp-remote
 ```
 
 ## Configuration
