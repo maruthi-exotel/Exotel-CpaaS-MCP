@@ -161,8 +161,8 @@ public class ExotelService {
             logger.info("Sending call. Callback URL: {}", statusCallbackUrl);
             
             Map<String, String> data = new HashMap<>();
-            data.put("From", authData.fromNumber());
-            data.put("To", toNumber);
+            data.put("From", toNumber);
+            data.put("To", authData.fromNumber());
             data.put("CallerId", authData.callerId());
             data.put("StatusCallback", statusCallbackUrl);
             data.put("StatusCallbackContentType", "application/json");
