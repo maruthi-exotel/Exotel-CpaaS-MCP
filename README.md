@@ -75,7 +75,8 @@ To integrate ExotelMCP with Claude, add the following configuration to your Clau
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://your-domain.com/mcp",
+        "http://ec2-13-127-242-200.ap-south-1.compute.amazonaws.com:8080/mcp",
+         "--allow-http"  
         "--header",
         "Authorization:${AUTH_HEADER}"
       ],
@@ -296,64 +297,11 @@ All these credentials should be properly formatted and added to your Claude conf
 3. **Security**: HTTPS is required for secure communication between Claude and your server
 4. **Production Ready**: Ensures reliable service for SMS/voice status updates
 
-### Deployment Options
-
-#### Option 1: Cloud Hosting (Recommended)
-
-##### **AWS EC2 Deployment**
-```bash
-# 1. Launch EC2 instance (t3.small or larger)
-# 2. Install Java 17
-sudo yum update -y
-sudo yum install -y java-17-amazon-corretto
-
-# 3. Install application
-wget https://github.com/your-repo/releases/download/v1.0.0/mcp-api.jar
-# or clone and build from source
-
-# 4. Configure environment
-export SERVER_PORT=8080
-export EXOTEL_BASE_URL=https://your-domain.com
-
-# 5. Run application
-java -jar mcp-api.jar
-
-# 6. Setup reverse proxy with Nginx/Apache for HTTPS
-```
-
-##### **Google Cloud Platform**
-```bash
-# Using Google App Engine
-# Create app.yaml:
-runtime: java17
-env: standard
-service: exotel-mcp
-
-# Deploy
-gcloud app deploy
-```
-
-##### **Microsoft Azure**
-```bash
-# Using Azure App Service
-az webapp create --resource-group myResourceGroup \
-  --plan myAppServicePlan --name exotel-mcp-server \
-  --runtime "JAVA:17-java17"
-```
-
-#### Option 2: VPS Hosting
-
-Popular VPS providers that work well:
-- **DigitalOcean**: Droplets with pre-configured Java environments
-- **Linode**: Reliable performance with good networking
-- **Vultr**: Fast deployment with multiple regions
-- **Hetzner**: Cost-effective European hosting
-
-#### Option 3: Container Deployment
+### Deployment Option
 
 ##### **Docker Setup**
 ```dockerfile
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 
 WORKDIR /app
 COPY target/mcp_api-0.0.1-SNAPSHOT.jar app.jar
@@ -389,50 +337,6 @@ services:
       - ./ssl:/etc/ssl/certs
 ```
 
-### SSL/HTTPS Setup
-
-#### Option 1: Let's Encrypt (Free)
-```bash
-# Install Certbot
-sudo apt install certbot python3-certbot-nginx
-
-# Get certificate
-sudo certbot --nginx -d your-domain.com
-
-# Auto-renewal
-sudo crontab -e
-0 12 * * * /usr/bin/certbot renew --quiet
-```
-
-#### Option 2: Cloudflare (Recommended)
-1. Add your domain to Cloudflare
-2. Set DNS A record to your server IP
-3. Enable "Full (strict)" SSL mode
-4. Automatic HTTPS redirect
-5. Free DDoS protection and CDN
-
-### Domain Configuration
-
-#### Purchase a Domain
-- **Namecheap**: Affordable with good management tools
-- **GoDaddy**: Popular with extensive support
-- **Google Domains**: Simple integration with Google services
-- **Cloudflare Registrar**: Best for developers
-
-#### DNS Configuration
-```
-# A Record
-Type: A
-Name: @ (or your subdomain)
-Value: YOUR_SERVER_IP
-TTL: 300
-
-# CNAME (if using subdomain)
-Type: CNAME
-Name: api
-Value: your-domain.com
-TTL: 300
-```
 
 ### Environment Configuration
 
@@ -441,11 +345,6 @@ TTL: 300
 # Server Configuration
 SERVER_PORT=8080
 SPRING_PROFILES_ACTIVE=production
-
-# Database (upgrade to PostgreSQL for production)
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/exotel_mcp
-SPRING_DATASOURCE_USERNAME=your_db_user
-SPRING_DATASOURCE_PASSWORD=your_db_password
 
 # Application URL (CRITICAL - must match your domain)
 EXOTEL_BASE_URL=https://your-domain.com
@@ -467,6 +366,7 @@ LOGGING_LEVEL_COM_EXAMPLE_MCP_API=INFO
       "args": [
         "mcp-remote",
         "https://your-domain.com/mcp",
+        "--allow-http"  // remove this if your server running on https.
         "--header",
         "Authorization:${AUTH_HEADER}"
       ],
@@ -483,11 +383,8 @@ LOGGING_LEVEL_COM_EXAMPLE_MCP_API=INFO
 - [ ] **Domain**: Registered and DNS configured
 - [ ] **HTTPS**: SSL certificate installed and working
 - [ ] **Server**: Application running on port 8080
-- [ ] **Database**: Production database configured (PostgreSQL recommended)
 - [ ] **Firewall**: Ports 80, 443, and 8080 open
 - [ ] **Monitoring**: Health checks and logging configured
-- [ ] **Backup**: Database backup strategy in place
-- [ ] **Updates**: Automatic security updates enabled
 
 #### Audio Service Requirements
 
@@ -502,19 +399,14 @@ LOGGING_LEVEL_COM_EXAMPLE_MCP_API=INFO
 #### 1. Test MCP Endpoint
 ```bash
 curl https://your-domain.com/mcp
-# Should return MCP server information
+# Should return data: {"type": "connection_established"}
 ```
 
-#### 2. Test Health Check
-```bash
-curl https://your-domain.com/actuator/health
-# Should return {"status":"UP"}
-```
 
 #### 3. Test with Claude
 - Update Claude configuration with your domain
 - Restart Claude Desktop
-- Send test message: "Send a test SMS to +919999999999"
+- Send test message: "Send a test SMS to +919999999999 using DltEntityId=XXXXXXX, From=EXOTEL,DltTemplateId=XXXXXXXXX"
 
 ### Troubleshooting Deployment
 
@@ -547,7 +439,7 @@ curl https://your-domain.com/actuator/health
 
 #### "Connection Failed" Error
 - Verify your domain is accessible: `curl https://your-domain.com/mcp`
-- Check your `mcp-remote` installation: `npx mcp-remote --version`
+- Check your `mcp-remote` installation: `npm list -g mcp-remote`
 - Ensure HTTPS is properly configured
 - Verify firewall allows incoming connections on port 443
 
