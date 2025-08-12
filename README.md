@@ -42,25 +42,6 @@ Verify installation:
 npm list -g mcp-remote
 ```
 
-## Configuration
-
-### Available Services
-
-ExotelMCP includes two main service types that are currently enabled:
-
-#### Current Configuration (in McpApiApplication.java)
-```java
-@Bean
-public List<ToolCallback> tools(ExotelService exotelService, QuickAudioService quickAudioService) {
-    List<ToolCallback> tools = new ArrayList<>();
-
-    tools.addAll(List.of(ToolCallbacks.from(exotelService)));           // ✅ ENABLED - Exotel communication services
-    tools.addAll(List.of(ToolCallbacks.from(quickAudioService)));       // ✅ ENABLED - Quick audio tools
-    return tools;
-}
-```
-
-**Note**: Only ExotelService and QuickAudioService are enabled by default. Other audio services are not included in this version.
 
 ### Claude Desktop Configuration
 
